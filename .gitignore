@@ -1,3 +1,4 @@
-/vir_env
+vir_env/
 logs.out
-/.vscode
+.vscode/
+__pycache__/
