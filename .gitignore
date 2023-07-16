@@ -1,4 +1,7 @@
 vir_env/
-logs*
+/secret*.txt
+/dist/
+/build/
+*.log
 .vscode/
 __pycache__/

