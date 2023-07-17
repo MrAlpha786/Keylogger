@@ -20,7 +20,8 @@ class Monkey:
         self._substitution = \
             {'Key.enter': '[ENTER]\n','Key.backspace': '[BACKSPACE]',
             'Key.space': ' ','Key.alt': '[ALT]','Key.alt_r': '[ALT]',
-            'Key.tab': '[TAB]', 'Key.delete': '[DEL]','Key.ctrl': '[CTRL]',
+            'Key.tab': '[TAB]', 'Key.delete': '[DEL]','Key.ctrl_l': '[CTRL]',
+            'Key.ctrl': '[CTRL]','Key.alt_l': '[ALT]','Key.alt_gr': '[ALT]',
             'Key.ctrl_r': '[CTRL]','Key.left': '[LEFT ARROW]',
             'Key.right': '[RIGHT ARROW]','Key.up': '[UP ARROW]',
             'Key.down': '[DOWN ARROW]','Key.shift': '[SHIFT]',
