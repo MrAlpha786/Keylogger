@@ -74,6 +74,6 @@ if __name__ == '__main__':
     config.debug = True
     with open(config.filepath, 'w') as demo:
         demo.write("This is a file create for testing puposes, it will be deleted automatically. Don't try to find it.")
-    Pigeon(config=config)
+    Pigeon(config=config).send()
     
     remove(config.filepath)
