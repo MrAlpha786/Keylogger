@@ -3,8 +3,8 @@ from os import path
 class PigeonConfig:
     def __init__(self) -> None:
         self.debug = True
-        self.subject = ""
-        self.body = ""
+        self.subject = "!!LogS!!"
+        self.body = "This email contains a log file."
         self.sender_email = ""
         self.password = ""
         self.receiver_email = ""

@@ -21,19 +21,21 @@ class Pigeon:
         if(self.config.debug):
             print(self.message_str)
             return True
+        
         try:
             # Log in to server using secure context and send email
             context = ssl.create_default_context()
             with smtplib.SMTP_SSL("smtp.gmail.com", 
-                                  465, context=context) as server:
+                                    465, context=context) as server:
                 server.login(self.config.sender_email, 
-                             self.config.password)
+                                self.config.password)
                 server.sendmail(self.config.sender_email,
                                 self.config.receiver_email,
                                 self.message_str)
-            return True
         except:
             return False
+        
+        return True
 
     def prepare_message(self) -> MIMEMultipart:
         # Create a multipart message and set headers
@@ -68,10 +70,19 @@ class Pigeon:
 
 
 if __name__ == '__main__':
-    from os import remove
+    from os import remove, path
 
     config = PigeonConfig()
     config.debug = True
+
+    secret_file = 'secret.txt'
+
+    if config.sender_email=="":
+        if not path.exists(secret_file):
+            with open(secret_file, 'w') as f:
+                f.write("sender@gmail.com\ndemopass")    
+        config.get_secret_from_file(secret_file)
+
     with open(config.filepath, 'w') as demo:
         demo.write("This is a file create for testing puposes, it will be deleted automatically. Don't try to find it.")
     Pigeon(config=config).send()
