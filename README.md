@@ -55,6 +55,6 @@ pyinstaller --onefile -w gui.py
     ```
 
     * **On Windows:**\
-        You can install tkinter module when you installing python on Windows. Click on Custom, in the installer and tick the tkinter option.
+        You can install tkinter module when installing python on Windows. Click on Custom, in the installer and tick the tkinter option.
 
 **Note:** Create an issue, if your problem is not listed above.
