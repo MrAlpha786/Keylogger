@@ -45,3 +45,16 @@ python3 app.py
 pip3 install pyinstaller
 pyinstaller --onefile -w gui.py
 ```
+
+## Troubleshoot
+1. **ModuleNotFoundError: No module named ‘tkinter’**
+    * **On Linux:**\
+    Install tkinter package.
+    ```bash
+    sudo apt install python3-tk 
+    ```
+
+    * **On Windows:**\
+        You can install tkinter module when you installing python on Windows. Click on Custom, in the installer and tick the tkinter option.
+
+**Note:** Create an issue, if your problem is not listed above.
