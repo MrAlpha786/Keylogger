@@ -1,5 +1,6 @@
 vir_env/
 /secret*.txt
+!/secret_template.txt
 /dist/
 /build/
 *.log
